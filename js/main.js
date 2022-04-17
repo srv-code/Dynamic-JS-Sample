@@ -8,7 +8,7 @@ class Person {
   constructor(name, age, deptId) {
     if (!name) throw new Error('Person has no name');
     if (!age) throw new Error('Person has no age');
-    if (deptId && departments.find(d => deptId === d.id) === null)
+    if (deptId && !departments.find(d => d.id === deptId))
       throw new Error('Invalid department id: ' + deptId);
 
     this.name = name;
@@ -45,49 +45,69 @@ const removeContent = (id = 'div-content') => {
   div?.parentNode?.removeChild(div);
 };
 
-const loadData = () => {
+const insertPersonData = () => {};
+
+const updatePersonData = () => {};
+
+const deletePersonData = () => {};
+
+const loadPersonTable = () => {
   removeContent();
 
-  const contentDiv = document.createElement('div');
-  contentDiv.id = 'div-content';
+  const contentDiv = createElement({ type: 'div', id: 'div-content' });
 
-  const para = document.createElement('p');
-  para.innerText = personData.length
-    ? `Found ${personData.length} records`
-    : 'No records found';
+  const editDiv = createElement({ type: 'div', className: 'div-edit' });
+  [
+    { title: 'Insert', onclick: insertPersonData },
+    { title: 'Update', onclick: updatePersonData },
+    { title: 'Delete', onclick: deletePersonData },
+  ].forEach(button =>
+    editDiv.appendChild(
+      createElement({
+        type: 'button',
+        title: button.title,
+        onclick: button.onclick,
+      })
+    )
+  );
+  contentDiv.appendChild(editDiv);
+
+  const para = createElement({
+    type: 'p',
+    text: personData.length
+      ? `Found ${personData.length} records`
+      : 'No records found',
+  });
   contentDiv.appendChild(para);
 
   if (personData.length) {
-    const table = document.createElement('table');
-    table.id = 'table-person';
-    table.className = 'table';
-
-    const tr = document.createElement('tr');
-    tr.className = 'table-data';
-    ['ID', 'Name', 'Age (in years)', 'Department', 'Comment'].forEach(title => {
-      let th = document.createElement('th');
-      th.className = 'table-data';
-      th.innerText = title;
-      tr.appendChild(th);
+    const table = createElement({
+      type: 'table',
+      id: 'table-person',
+      className: 'table',
     });
+
+    const tr = createElement({ type: 'tr', className: 'table-data' });
+    ['ID', 'Name', 'Age (in years)', 'Department'].forEach(title =>
+      tr.appendChild(
+        createElement({ type: 'th', className: 'table-data', text: title })
+      )
+    );
     table.appendChild(tr);
 
     personData.forEach(data => {
-      const tr = document.createElement('tr');
-      tr.className = 'table-data';
+      const tr = createElement({ type: 'tr', className: 'table-data' });
 
       [
         data.id,
         data.person.name,
         data.person.age,
         departments.find(d => d.id === data.person.deptId)?.name || 'None',
-        data.person.toString(),
-      ].forEach(info => {
-        const td = document.createElement('td');
-        td.className = 'table-data';
-        td.innerText = info;
-        tr.appendChild(td);
-      });
+      ].forEach(info =>
+        tr.appendChild(
+          createElement({ type: 'td', className: 'table-data', text: info })
+        )
+      );
 
       table.appendChild(tr);
     });
@@ -102,7 +122,7 @@ const loadData = () => {
 
 const clearData = () => {
   removeContent();
-  document.getElementById('label-status').innerText = 'All cleared';
+  document.getElementById('label-status').innerText = 'Content cleared';
 };
 
 // const showData = () => {};
@@ -119,7 +139,7 @@ const generateForm = () => {
   const fragment = document.createDocumentFragment();
   elementProps
     .filter(p => !p.loadOnInit)
-    .forEach(prop => fragment.appendChild(generateElement(prop)));
+    .forEach(prop => fragment.appendChild(createElement(prop)));
   document.body.appendChild(fragment);
   document.getElementById('label-status').innerText = 'Form generated';
 };
@@ -139,7 +159,7 @@ const elementProps = [
     type: 'button',
     id: 'button-load-data',
     title: 'Load Data',
-    onclick: loadData,
+    onclick: loadPersonTable,
   },
   // {
   //   type: 'button',
@@ -168,12 +188,12 @@ const elementProps = [
   },
 ];
 
-const generateElement = prop => {
+const createElement = prop => {
   let element;
   switch (prop.type) {
     case 'button':
       element = document.createElement('button');
-      element.id = prop.id;
+      if (prop.id) element.id = prop.id;
       element.appendChild(document.createTextNode(prop.title));
       element.onclick = prop.onclick;
       element.className = 'button';
@@ -196,6 +216,18 @@ const generateElement = prop => {
       element.appendChild(label);
       break;
 
+    case 'div':
+    case 'p':
+    case 'table':
+    case 'tr':
+    case 'th':
+    case 'td':
+      element = document.createElement(prop.type);
+      if (prop.id) element.id = prop.id;
+      if (prop.className) element.className = prop.className;
+      if (prop.text) element.innerText = prop.text;
+      break;
+
     default:
       throw new Error('Invalid prop type: ' + prop.type);
   }
@@ -208,7 +240,7 @@ const loadInitiatingElements = () => {
   elementProps
     .filter(p => p.loadOnInit)
     .forEach(prop => {
-      prop.element = generateElement(prop);
+      prop.element = createElement(prop);
       fragment.appendChild(prop.element);
     });
   document.body.appendChild(fragment);
@@ -217,7 +249,7 @@ const loadInitiatingElements = () => {
 window.onerror = (message, source, lineno, colno, error) =>
   alert(
     'Error occured:\n' +
-      JSON.stringify({ message, source, lineno, colno, error })
+      JSON.stringify({ message, source, lineno, colno, error }, null, 2)
   );
 
 document.onload = setTimeout(loadInitiatingElements, 0);
