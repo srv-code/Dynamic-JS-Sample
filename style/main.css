@@ -1,0 +1,38 @@
+.label-container {
+  border-width: 1px;
+  border-radius: 2px;
+  padding: 5px;
+  margin: 5px;
+  font-size: medium;
+  background-color: lightblue;
+}
+
+.label-label {
+  color: gray;
+  margin-right: 5px;
+}
+
+.label-data {
+  color: blue;
+}
+
+.button {
+  /* border-radius: 5px; */
+  padding: 3px;
+  margin: 0 3px 0 3px;
+}
+
+table {
+  width: 100%;
+  border: 1px solid black;
+}
+
+.table-data {
+  border: 1px solid black;
+}
+
+body {
+  background-color: lightyellow;
+  align-items: center;
+  padding: 10px;
+}
