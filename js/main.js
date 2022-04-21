@@ -66,7 +66,9 @@ const removeContent = (id = 'div-content') => {
   state.editingInfo = null;
 };
 
-const addPerson = () => {};
+const addPerson = () => {
+  const table = document.getElementById('');
+};
 
 // const decodeHiddenRowValue = string => {
 //   const attrs = {};
@@ -471,7 +473,7 @@ const loadPersonTable = () => {
     contentDiv.appendChild(table);
   }
 
-  document.body.appendChild(contentDiv);
+  document.getElementById('root').appendChild(contentDiv);
   document.getElementById('label-status').innerText =
     'Data loaded at ' + new Date().toLocaleString();
 };
@@ -496,7 +498,7 @@ const generateForm = () => {
   elementProps
     .filter(p => !p.loadOnInit)
     .forEach(prop => fragment.appendChild(createElement(prop)));
-  document.body.appendChild(fragment);
+  document.getElementById('root').appendChild(fragment);
   document.getElementById('label-status').innerText = 'Form generated';
 };
 
@@ -520,13 +522,13 @@ const elementProps = [
   },
   {
     type: 'button',
-    id: 'button-fetch-data',
+    id: 'button-fetch_data',
     title: 'Fetch',
     onclick: loadPersonTable,
   },
   {
     type: 'button',
-    id: 'button-add-data',
+    id: 'button-add_data',
     title: 'Add',
     onclick: addPerson,
   },
@@ -676,7 +678,7 @@ const loadInitiatingElements = () => {
       prop.element = createElement(prop);
       fragment.appendChild(prop.element);
     });
-  document.body.appendChild(fragment);
+  document.getElementById('root').appendChild(fragment);
 };
 
 window.onerror = (message, source, lineno, colno, error) =>
