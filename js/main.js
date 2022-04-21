@@ -106,7 +106,7 @@ const addPersonTableRow = ({ table, personId = null, person = null }) => {
       alt: 'delete',
       height: 17,
       src: './resources/bin.png',
-      onclick: () => deletePerson(personId),
+      onclick: () => deletePerson(personId, trId),
     })
   );
   tr.appendChild(tdCross);
@@ -315,14 +315,14 @@ const editPerson = (trId, personId, adding = false) => {
   nameInput.focus();
 };
 
-const deletePerson = id => {
+const deletePerson = (id, trId) => {
   if (confirm(`Delete person with ID ${id}?`)) {
     personRecords.splice(
       personRecords.findIndex(p => p.id === id),
       1
     );
 
-    loadPersonTable();
+    document.getElementById(trId).remove();
 
     document.getElementById(
       'label-status'
