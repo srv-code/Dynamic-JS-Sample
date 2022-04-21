@@ -77,11 +77,6 @@ const addPersonTableRow = ({ table, personId = null, person = null }) => {
   });
 
   [
-    // {
-    //   id: `td-hidden-p${personId}`,
-    //   hidden: true,
-    //   value: 'mode=show;error=;',
-    // },
     { id: `td-id-p${personId}`, value: personId },
     { id: `td-name-p${personId}`, value: person?.name || '' },
     { id: `td-age-p${personId}`, value: person?.age || 18 },
@@ -133,35 +128,11 @@ const addPerson = () => {
     alert('Load table first');
     return;
   }
-  // const newId = ++state.personIdCounter;
-  // const trId = `tr-p${newId}`;
-  // const tr = createElement({
-  //   type: 'tr',
-  //   id: trId,
-  //   ondblclick: () => editPerson(trId, newId),
-  // });
 
-  // const newRow = createElement({ id: '' });
-  // table.appendChild();
   addPersonTableRow({ table });
 };
 
-// const decodeHiddenRowValue = string => {
-//   const attrs = {};
-
-//   string.split(';').forEach(ln => {
-//     if (ln) {
-//       const [k, v] = ln.split('=');
-//       attrs[k] = v;
-//     }
-//   });
-
-//   return attrs;
-// };
-
 const updatePerson = data => {
-  console.log(`updatePerson:: data:`, data);
-
   const item = personRecords.find(p => p.id === data.id);
   const deptId = departments.find(d => d.id === +data.deptId)?.id;
 
@@ -171,26 +142,9 @@ const updatePerson = data => {
       id: data.id,
       person: new Person(data.name, data.age, deptId || null),
     });
-
-  console.log('updated person:', {
-    personRecords,
-    item,
-    deptId,
-    data,
-  });
 };
 
-// const encodeHiddenRowValue = attrs => {
-//   let string = '';
-
-//   for (const key in attrs) string += `${key}=${attrs[key]};`;
-
-//   return string;
-// };
-
 const revertEditingPerson = (tr, personId) => {
-  console.log('revertEditingPerson::', { tr, personId });
-
   const person = personRecords.find(p => p.id === personId)?.person;
 
   let childHierarchy = '';
@@ -201,13 +155,6 @@ const revertEditingPerson = (tr, personId) => {
     });
   });
 
-  console.log(
-    'revertEditingPerson:: person:',
-    person,
-    ', child node names:',
-    childHierarchy
-  );
-
   /* in case of adding a new person, remove the whole row directly */
   if (!person) {
     tr.remove();
@@ -216,64 +163,32 @@ const revertEditingPerson = (tr, personId) => {
   }
 
   tr.childNodes.forEach(node => {
-    console.log('revertEditingPerson:: node:', node);
-
-    // if (!node.id.startsWith('td-delete-p') || node.id.startsWith('td-delete-p')) {
     if (node.id.startsWith('td-name-p')) node.innerText = person.name;
     else if (node.id.startsWith('td-age-p')) node.innerText = person.age;
     else if (node.id.startsWith('td-dept-p'))
       node.innerText = person.deptId
         ? departments.find(d => d.id === person.deptId)?.name || 'Unknown'
         : 'None';
-    // }
     else if (node.id.startsWith('td-delete-p')) {
-      console.log('revertEditingPerson:: childNodes:', node.childNodes);
-
       const nodesToRemove = [];
       node.childNodes.forEach(childNode => {
-        console.log('revertEditingPerson:: childNode:', childNode);
-
-        if (childNode.id.startsWith('img-delete-')) {
-          console.log('revertEditingPerson:: making node visible:', childNode);
+        if (childNode.id.startsWith('img-delete-'))
           childNode.style = 'display: flex;';
-        } else if (childNode.id.startsWith('editing-')) {
-          console.log('revertEditingPerson:: marking for removal:', childNode);
+        else if (childNode.id.startsWith('editing-'))
           nodesToRemove.push(childNode);
-          // childNode.parentNode.removeChild(childNode);
-          // node.removeChild(childNode);
-          // childNode.remove();
-        }
       });
 
       nodesToRemove.forEach(node => node.remove());
     }
-
-    // if (!node.id.startsWith('td-id-'))
-    //   node.childNodes.forEach(childNode => {
-    //     console.log('revertEditingPerson:: childNode:', childNode);
-
-    //     if (childNode.id?.startsWith('img-delete-')) {
-    //       console.log('revertEditingPerson:: making node visible:', node);
-    //       node.style = 'display: flex;';
-    //     } else if (childNode.id?.startsWith('editing-')) {
-    //       console.log('revertEditingPerson:: removing:', childNode);
-    //       childNode.remove();
-    //     }
-    //   });
   });
 
   state.editingInfo = null;
 };
 
 const editPerson = (trId, personId, adding = false) => {
-  // alert(`edit tr=${trId}, personId=${personId}`);
   const tr = document.getElementById(trId);
   const updatedPersonValue = { id: personId };
-  // let hiddenAttrs;
-  // if (tr.childNodes[0].id.startsWith('td-hidden-p'))
-  //   hiddenAttrs = decodeHiddenRowValue(tr.childNodes[0].value);
 
-  // if (state.editingInfo?.id === personId) return false;
   if (!state.editingInfo) {
     state.editingInfo = { personId, errors: {} };
   } else if (state.editingInfo.personId === personId) {
@@ -284,8 +199,6 @@ const editPerson = (trId, personId, adding = false) => {
   }
 
   tr.childNodes.forEach(node => {
-    console.log('editPerson:: node:', node);
-
     if (node.id.startsWith('td-name-p')) {
       updatedPersonValue.name = node.innerText;
       node.innerText = '';
@@ -298,43 +211,15 @@ const editPerson = (trId, personId, adding = false) => {
           autofocus: true,
           value: updatedPersonValue.name,
           onchange: event => {
-            console.log(
-              'value:',
-              event.target.value,
-              ', valid:',
-              !!event.target.value.match(/^[a-z ]{5,10}$/i)
-            );
             if (event.target.value.match(/^[a-z ]{5,10}$/i)) {
               event.target.className = 'valid-input';
               delete state.editingInfo.errors['Name'];
-              // state.editingInfo.errors['Name'] = undefined;
-              // tr.childNodes[0].value = encodeHiddenRowValue(hiddenAttrs);
               updatedPersonValue.name = event.target.value;
             } else {
               event.target.className = 'invalid-input';
               state.editingInfo.errors['Name'] = 'Invalid name';
-              // hiddenAttrs.error = 'Invalid name';
-              // tr.childNodes[0].value = encodeHiddenRowValue(hiddenAttrs);
             }
           },
-          // onkeypress: event => {
-          //   let value = event.target.value;
-          //   if (event.key !== 'Enter') value += event.key;
-
-          //   event.target.className =
-          //     event.key === 'a' ? 'invalid-input' : 'valid-input';
-
-          //   console.log(
-          //     'onkeypress:',
-          //     value,
-          //     event,
-          //     event.key,
-          //     event.target.value,
-          //     // document.getElementById(`editing-${node.id}`).value,
-          //     'accept button:',
-          //     document.getElementById(`editing_accept-${node.id}`)
-          //   );
-          // },
         })
       );
     } else if (node.id.startsWith('td-age-p')) {
@@ -356,15 +241,10 @@ const editPerson = (trId, personId, adding = false) => {
               +event.target.value <= 60
             ) {
               delete state.editingInfo.errors['Age'];
-              // state.editingInfo.errors['Age'] = undefined;
-              // hiddenAttrs.error = '';
-              // tr.childNodes[0].value = encodeHiddenRowValue(hiddenAttrs);
               updatedPersonValue.age = event.target.value;
               event.target.className = 'valid-input';
             } else {
               state.editingInfo.errors['Age'] = 'Invalid age';
-              // hiddenAttrs.error = 'Invalid age';
-              // tr.childNodes[0].value = encodeHiddenRowValue(hiddenAttrs);
               event.target.className = 'invalid-input';
             }
           },
@@ -387,14 +267,8 @@ const editPerson = (trId, personId, adding = false) => {
         })
       );
     } else if (node.id.startsWith('td-delete-p')) {
-      console.log('delete img tr:', node, node.childNodes);
       node.childNodes[0].style = 'display: none;';
-      // node.childNodes[0].remove();
 
-      // const wrapperDiv = createElement({
-      //   type: 'div',
-      //   id: `editing-${node.id}`,
-      // });
       node.appendChild(
         createElement({
           type: 'img',
@@ -412,24 +286,10 @@ const editPerson = (trId, personId, adding = false) => {
                 errorMessage += `\n${state.editingInfo.errors[key]}`;
 
               alert(errorMessage);
-
-              // console.log(
-              //   `before updating: errors:`,
-              //   state.editingInfo.errors,
-              //   ',len:',
-              //   errorLen,
-              //   ', errorMessage:',
-              //   errorMessage,
-              //   `, updatePerson:`,
-              //   updatedPersonValue
-              // );
             } else {
               updatePerson(updatedPersonValue);
 
               state.editingInfo = null;
-              // hiddenAttrs.mode = 'show';
-              // hiddenAttrs.error = '';
-              // tr.childNodes[0].value = encodeHiddenRowValue(hiddenAttrs);
 
               loadPersonTable();
 
@@ -457,8 +317,6 @@ const editPerson = (trId, personId, adding = false) => {
           className: 'edit-button',
         })
       );
-
-      // node.appendChild(wrapperDiv);
     }
   });
 };
@@ -570,19 +428,6 @@ const elementProps = [
     title: 'Add',
     onclick: addPerson,
   },
-
-  // {
-  //   type: 'button',
-  //   id: 'button-show-data',
-  //   title: 'Show Data',
-  //   onclick: showData,
-  // },
-  // {
-  //   type: 'button',
-  //   id: 'button-show-status',
-  //   title: 'Show Status',
-  //   onclick: showStatus,
-  // },
   {
     type: 'button',
     id: 'button-clear',
@@ -652,29 +497,6 @@ const createElement = prop => {
       if (prop.onclick) element.onclick = prop.onclick;
       break;
 
-    // case 'textbox':
-    //   element = document.createElement('div');
-    //   if (prop.id) element.id = prop.id;
-    //   element.className = prop.className || 'textbox-container';
-
-    //   const input = document.createElement('input');
-    //   input.id = `input-text-${prop.id}`;
-    //   input.type = 'text';
-    //   input.value = prop.value;
-    //   if (prop.onkeypress) element.onkeypress = prop.onkeypress;
-    //   if (prop.onchange) element.onchange = prop.onchange;
-
-    //   const img = document.createElement('img');
-    //   img.id = `img-status-${prop.id}`;
-    //   img.src = './resources/red-warn.png';
-    //   img.height = 15;
-    //   img.width = 15;
-    //   img.alt = 'input-error';
-
-    //   element.appendChild(input);
-    //   element.appendChild(img);
-    //   break;
-
     case 'input':
       element = document.createElement('input');
       if (prop.id) element.id = prop.id;
@@ -682,7 +504,6 @@ const createElement = prop => {
       if (prop.min !== null && prop.min !== undefined) element.min = prop.min;
       if (prop.max !== null && prop.max !== undefined) element.max = prop.max;
       if (prop.value) element.value = prop.value;
-      // if (prop.onkeypress) element.onkeypress = prop.onkeypress;
       if (prop.autofocus) element.autofocus = prop.autofocus;
       if (prop.onchange) element.onchange = prop.onchange;
       if (prop.className) element.className = prop.className;
