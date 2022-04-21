@@ -198,17 +198,18 @@ const editPerson = (trId, personId, adding = false) => {
     return;
   }
 
+  let nameInput;
+
   tr.childNodes.forEach(node => {
     if (node.id.startsWith('td-name-p')) {
       updatedPersonValue.name = node.innerText;
       node.innerText = '';
 
       node.appendChild(
-        createElement({
+        (nameInput = createElement({
           type: 'input',
           id: `editing-${node.id}`,
           mode: 'text',
-          autofocus: true,
           value: updatedPersonValue.name,
           onchange: event => {
             if (event.target.value.match(/^[a-z ]{5,10}$/i)) {
@@ -220,7 +221,7 @@ const editPerson = (trId, personId, adding = false) => {
               state.editingInfo.errors['Name'] = 'Invalid name';
             }
           },
-        })
+        }))
       );
     } else if (node.id.startsWith('td-age-p')) {
       updatedPersonValue.age = node.innerText;
@@ -288,7 +289,6 @@ const editPerson = (trId, personId, adding = false) => {
               alert(errorMessage);
             } else {
               updatePerson(updatedPersonValue);
-
               state.editingInfo = null;
 
               loadPersonTable();
@@ -319,6 +319,8 @@ const editPerson = (trId, personId, adding = false) => {
       );
     }
   });
+
+  nameInput.focus();
 };
 
 const deletePerson = id => {
@@ -504,7 +506,6 @@ const createElement = prop => {
       if (prop.min !== null && prop.min !== undefined) element.min = prop.min;
       if (prop.max !== null && prop.max !== undefined) element.max = prop.max;
       if (prop.value) element.value = prop.value;
-      if (prop.autofocus) element.autofocus = prop.autofocus;
       if (prop.onchange) element.onchange = prop.onchange;
       if (prop.className) element.className = prop.className;
       break;
