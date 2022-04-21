@@ -147,14 +147,6 @@ const updatePerson = data => {
 const revertEditingPerson = (tr, personId) => {
   const person = personRecords.find(p => p.id === personId)?.person;
 
-  let childHierarchy = '';
-  tr.childNodes.forEach(node => {
-    childHierarchy += `\n- ${node.id}`;
-    node.childNodes.forEach(child => {
-      childHierarchy += `\n  - ${child.id}`;
-    });
-  });
-
   /* in case of adding a new person, remove the whole row directly */
   if (!person) {
     tr.remove();
