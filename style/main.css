@@ -31,11 +31,28 @@ table {
   border: 1px solid black;
 }
 
-.div-edit {
-  background-color: lightcoral;
-  border-radius: 5px;
-  padding: 5px 3px 7px 3px;
-  display: inline;
+.td-buttons {
+  border-width: 0px;
+  align-items: center;
+  justify-content: center;
+}
+
+.textbox-container {
+  align-items: center;
+}
+
+.edit-button {
+  margin: 0 2px 0 2px;
+}
+
+.invalid-input {
+  color: yellow;
+  background-color: red;
+}
+
+.valid-input {
+  color: null;
+  background-color: null;
 }
 
 body {
