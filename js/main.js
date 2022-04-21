@@ -41,7 +41,7 @@ class Person {
   }
 }
 
-const personData = [
+const personRecords = [
   {
     id: ++state.personIdCounter,
     person: new Person('Ram', 29, 200),
@@ -61,8 +61,9 @@ const personData = [
 ];
 
 const removeContent = (id = 'div-content') => {
-  let div = document.getElementById(id);
-  div?.parentNode?.removeChild(div);
+  const node = document.getElementById(id);
+  node?.parentNode?.removeChild(node);
+  state.editingInfo = null;
 };
 
 const addPerson = () => {};
@@ -83,17 +84,22 @@ const addPerson = () => {};
 const updatePerson = data => {
   console.log(`updatePerson:: data:`, data);
 
-  const item = personData.find(p => p.id === data.id);
+  const item = personRecords.find(p => p.id === data.id);
   const deptId = departments.find(d => d.id === +data.deptId)?.id;
 
   if (item) item.person = new Person(data.name, data.age, deptId || null);
   else
-    personData.push({
+    personRecords.push({
       id: ++state.personIdCounter,
       person: new Person(data.name, data.age, deptId || null),
     });
 
-  console.log('updated person:', { personData, item, deptId, data });
+  console.log('updated person:', {
+    personData: personRecords,
+    item,
+    deptId,
+    data,
+  });
 };
 
 // const encodeHiddenRowValue = attrs => {
@@ -103,6 +109,74 @@ const updatePerson = data => {
 
 //   return string;
 // };
+
+const revertEditingPerson = (tr, personId) => {
+  const person = personRecords.find(p => p.id === personId).person;
+
+  let childHierarchy = '';
+  tr.childNodes.forEach(node => {
+    childHierarchy += `\n- ${node.id}`;
+    node.childNodes.forEach(child => {
+      childHierarchy += `\n  - ${child.id}`;
+    });
+  });
+
+  console.log(
+    'revertEditingPerson:: person:',
+    person,
+    ', child node names:',
+    childHierarchy
+  );
+
+  tr.childNodes.forEach(node => {
+    console.log('revertEditingPerson:: node:', node);
+
+    // if (!node.id.startsWith('td-delete-p') || node.id.startsWith('td-delete-p')) {
+    if (node.id.startsWith('td-name-p')) node.innerText = person.name;
+    else if (node.id.startsWith('td-age-p')) node.innerText = person.age;
+    else if (node.id.startsWith('td-dept-p'))
+      node.innerText = person.deptId
+        ? departments.find(d => d.id === person.deptId)?.name || 'Unknown'
+        : 'None';
+    // }
+    else if (node.id.startsWith('td-delete-p')) {
+      console.log('revertEditingPerson:: childNodes:', node.childNodes);
+
+      const nodesToRemove = [];
+      node.childNodes.forEach(childNode => {
+        console.log('revertEditingPerson:: childNode:', childNode);
+
+        if (childNode.id.startsWith('img-delete-')) {
+          console.log('revertEditingPerson:: making node visible:', childNode);
+          childNode.style = 'display: flex;';
+        } else if (childNode.id.startsWith('editing-')) {
+          console.log('revertEditingPerson:: marking for removal:', childNode);
+          nodesToRemove.push(childNode);
+          // childNode.parentNode.removeChild(childNode);
+          // node.removeChild(childNode);
+          // childNode.remove();
+        }
+      });
+
+      nodesToRemove.forEach(node => node.remove(node));
+    }
+
+    // if (!node.id.startsWith('td-id-'))
+    //   node.childNodes.forEach(childNode => {
+    //     console.log('revertEditingPerson:: childNode:', childNode);
+
+    //     if (childNode.id?.startsWith('img-delete-')) {
+    //       console.log('revertEditingPerson:: making node visible:', node);
+    //       node.style = 'display: flex;';
+    //     } else if (childNode.id?.startsWith('editing-')) {
+    //       console.log('revertEditingPerson:: removing:', childNode);
+    //       childNode.remove();
+    //     }
+    //   });
+  });
+
+  state.editingInfo = null;
+};
 
 const editPerson = (trId, personId) => {
   // alert(`edit tr=${trId}, personId=${personId}`);
@@ -123,7 +197,7 @@ const editPerson = (trId, personId) => {
   }
 
   tr.childNodes.forEach(node => {
-    console.log('node:', node);
+    console.log('editPerson:: node:', node);
 
     // ignoring node ID 'td-id-pXXX'
 
@@ -228,7 +302,8 @@ const editPerson = (trId, personId) => {
       );
     } else if (node.id.startsWith('td-delete-p')) {
       console.log('delete img tr:', node, node.childNodes);
-      node.childNodes[0].remove();
+      node.childNodes[0].style = 'display: none;';
+      // node.childNodes[0].remove();
 
       // const wrapperDiv = createElement({
       //   type: 'div',
@@ -237,7 +312,7 @@ const editPerson = (trId, personId) => {
       node.appendChild(
         createElement({
           type: 'img',
-          id: `editing_accept-${node.id}`,
+          id: `editing-accept-${node.id}`,
           src: './resources/tick.png',
           alt: 'accept edit',
           height: 17,
@@ -283,12 +358,14 @@ const editPerson = (trId, personId) => {
       node.appendChild(
         createElement({
           type: 'img',
-          id: `editing_decline-${node.id}`,
+          id: `editing-decline-${node.id}`,
           src: './resources/cross.png',
           alt: 'decline edit',
           height: 15,
           width: 15,
-          onclick: () => alert('decline edit'),
+          onclick: () => {
+            if (confirm('Decline edit?')) revertEditingPerson(tr, personId);
+          },
           className: 'edit-button',
         })
       );
@@ -300,8 +377,8 @@ const editPerson = (trId, personId) => {
 
 const deletePerson = id => {
   if (confirm(`Delete person with ID ${id}?`)) {
-    personData.splice(
-      personData.findIndex(p => p.id === id),
+    personRecords.splice(
+      personRecords.findIndex(p => p.id === id),
       1
     );
 
@@ -320,13 +397,13 @@ const loadPersonTable = () => {
 
   const para = createElement({
     type: 'p',
-    text: personData.length
-      ? `Found ${personData.length} records`
+    text: personRecords.length
+      ? `Found ${personRecords.length} records`
       : 'No records found',
   });
   contentDiv.appendChild(para);
 
-  if (personData.length) {
+  if (personRecords.length) {
     const table = createElement({
       type: 'table',
       id: 'table-person',
@@ -339,7 +416,7 @@ const loadPersonTable = () => {
     );
     table.appendChild(tr);
 
-    personData.forEach(data => {
+    personRecords.forEach(data => {
       const trId = `tr-p${data.id}`;
       const tr = createElement({
         type: 'tr',
