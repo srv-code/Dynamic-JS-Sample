@@ -144,7 +144,7 @@ const updatePerson = data => {
     });
 };
 
-const revertEditingPerson = (tr, personId) => {
+const stopEditingPerson = (tr, personId) => {
   const person = personRecords.find(p => p.id === personId)?.person;
 
   /* in case of adding a new person, remove the whole row directly */
@@ -283,7 +283,7 @@ const editPerson = (trId, personId, adding = false) => {
               updatePerson(updatedPersonValue);
               state.editingInfo = null;
 
-              loadPersonTable();
+              stopEditingPerson(tr, personId);
 
               document.getElementById(
                 'label-status'
@@ -304,7 +304,7 @@ const editPerson = (trId, personId, adding = false) => {
           height: 15,
           width: 15,
           onclick: () => {
-            if (confirm('Decline edit?')) revertEditingPerson(tr, personId);
+            if (confirm('Decline edit?')) stopEditingPerson(tr, personId);
           },
           className: 'edit-button',
         })
