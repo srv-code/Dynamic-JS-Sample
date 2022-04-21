@@ -66,8 +66,70 @@ const removeContent = (id = 'div-content') => {
   state.editingInfo = null;
 };
 
+const addPersonTableRow = ({ table, personId = null, person = null }) => {
+  const trId = `tr-p${personId}`;
+  const tr = createElement({
+    type: 'tr',
+    id: trId,
+    ondblclick: () => editPerson(trId, personId),
+  });
+
+  [
+    // {
+    //   id: `td-hidden-p${personId}`,
+    //   hidden: true,
+    //   value: 'mode=show;error=;',
+    // },
+    { id: `td-id-p${personId}`, value: personId },
+    { id: `td-name-p${personId}`, value: person.name },
+    { id: `td-age-p${personId}`, value: person.age },
+    {
+      id: `td-dept-p${personId}`,
+      value: departments.find(d => d.id === person.deptId)?.name || 'None',
+    },
+  ].forEach(info =>
+    tr.appendChild(
+      createElement({
+        id: info.id,
+        type: 'td',
+        text: info.value,
+      })
+    )
+  );
+
+  const tdCross = createElement({
+    type: 'td',
+    id: `td-delete-p${personId}`,
+  });
+  tdCross.className = 'td-buttons';
+  tdCross.appendChild(
+    createElement({
+      type: 'img',
+      id: `img-delete-${personId}`,
+      alt: 'delete',
+      height: 17,
+      src: './resources/bin.png',
+      onclick: () => deletePerson(personId),
+    })
+  );
+  tr.appendChild(tdCross);
+
+  table.appendChild(tr);
+};
+
 const addPerson = () => {
-  const table = document.getElementById('');
+  const table = document.getElementById('table-person');
+  // const newId = ++state.personIdCounter;
+  // const trId = `tr-p${newId}`;
+  // const tr = createElement({
+  //   type: 'tr',
+  //   id: trId,
+  //   ondblclick: () => editPerson(trId, newId),
+  // });
+
+  // const newRow = createElement({ id: '' });
+  // table.appendChild();
+  addPersonTableRow({ table });
 };
 
 // const decodeHiddenRowValue = string => {
@@ -418,57 +480,9 @@ const loadPersonTable = () => {
     );
     table.appendChild(tr);
 
-    personRecords.forEach(data => {
-      const trId = `tr-p${data.id}`;
-      const tr = createElement({
-        type: 'tr',
-        id: trId,
-        ondblclick: () => editPerson(trId, data.id),
-      });
-
-      [
-        // {
-        //   id: `td-hidden-p${data.id}`,
-        //   hidden: true,
-        //   value: 'mode=show;error=;',
-        // },
-        { id: `td-id-p${data.id}`, value: data.id },
-        { id: `td-name-p${data.id}`, value: data.person.name },
-        { id: `td-age-p${data.id}`, value: data.person.age },
-        {
-          id: `td-dept-p${data.id}`,
-          value:
-            departments.find(d => d.id === data.person.deptId)?.name || 'None',
-        },
-      ].forEach(info =>
-        tr.appendChild(
-          createElement({
-            id: info.id,
-            type: 'td',
-            text: info.value,
-          })
-        )
-      );
-
-      const tdCross = createElement({
-        type: 'td',
-        id: `td-delete-p${data.id}`,
-      });
-      tdCross.className = 'td-buttons';
-      tdCross.appendChild(
-        createElement({
-          type: 'img',
-          id: `img-delete-${data.id}`,
-          alt: 'delete',
-          height: 17,
-          src: './resources/bin.png',
-          onclick: () => deletePerson(data.id),
-        })
-      );
-      tr.appendChild(tdCross);
-
-      table.appendChild(tr);
-    });
+    personRecords.forEach(data =>
+      addPersonTableRow({ table, personId: data.id, person: data.person })
+    );
 
     contentDiv.appendChild(table);
   }
