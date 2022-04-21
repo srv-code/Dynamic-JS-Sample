@@ -33,7 +33,7 @@ class Person {
 
     this.name = name;
     this.age = age;
-    this.deptId = deptId; // can be null
+    this.deptId = deptId; /* can be null */
   }
 
   toString() {
@@ -381,8 +381,6 @@ const clearContent = () => {
   document.getElementById('label-status').innerText = 'Content cleared';
 };
 
-// const showData = () => {};
-
 const clearInitiatingElements = () => {
   elementProps
     .filter(p => p.loadOnInit)
@@ -401,7 +399,7 @@ const generateForm = () => {
 };
 
 const elementProps = [
-  // intiating elements
+  /* intiating elements */
   {
     loadOnInit: true,
     type: 'button',
@@ -410,7 +408,7 @@ const elementProps = [
     onclick: generateForm,
   },
 
-  // buttons elements
+  /* buttons */
   // TODO: Remove this, for debugging purpose only
   {
     type: 'button',
@@ -437,7 +435,7 @@ const elementProps = [
     onclick: clearContent,
   },
 
-  // labels
+  /* labels */
   {
     type: 'label',
     id: 'label-status',
