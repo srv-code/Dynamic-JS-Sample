@@ -63,10 +63,12 @@ const personRecords = [
 const removeContent = (id = 'div-content') => {
   const node = document.getElementById(id);
   node?.parentNode?.removeChild(node);
+
   state.editingInfo = null;
 };
 
 const addPersonTableRow = ({ table, personId = null, person = null }) => {
+  if (!personId) personId = ++state.personIdCounter;
   const trId = `tr-p${personId}`;
   const tr = createElement({
     type: 'tr',
@@ -81,11 +83,11 @@ const addPersonTableRow = ({ table, personId = null, person = null }) => {
     //   value: 'mode=show;error=;',
     // },
     { id: `td-id-p${personId}`, value: personId },
-    { id: `td-name-p${personId}`, value: person.name },
-    { id: `td-age-p${personId}`, value: person.age },
+    { id: `td-name-p${personId}`, value: person?.name || '' },
+    { id: `td-age-p${personId}`, value: person?.age || 18 },
     {
       id: `td-dept-p${personId}`,
-      value: departments.find(d => d.id === person.deptId)?.name || 'None',
+      value: departments.find(d => d.id === person?.deptId)?.name || 'None',
     },
   ].forEach(info =>
     tr.appendChild(
@@ -115,10 +117,22 @@ const addPersonTableRow = ({ table, personId = null, person = null }) => {
   tr.appendChild(tdCross);
 
   table.appendChild(tr);
+
+  /* enable editing mode if a new person is being added */
+  if (!person) editPerson(trId, personId, true);
 };
 
 const addPerson = () => {
+  if (state.editingInfo) {
+    alert('Finish editing the other person first');
+    return;
+  }
+
   const table = document.getElementById('table-person');
+  if (!table) {
+    alert('Load table first');
+    return;
+  }
   // const newId = ++state.personIdCounter;
   // const trId = `tr-p${newId}`;
   // const tr = createElement({
@@ -154,12 +168,12 @@ const updatePerson = data => {
   if (item) item.person = new Person(data.name, data.age, deptId || null);
   else
     personRecords.push({
-      id: ++state.personIdCounter,
+      id: data.id,
       person: new Person(data.name, data.age, deptId || null),
     });
 
   console.log('updated person:', {
-    personData: personRecords,
+    personRecords,
     item,
     deptId,
     data,
@@ -242,7 +256,7 @@ const revertEditingPerson = (tr, personId) => {
   state.editingInfo = null;
 };
 
-const editPerson = (trId, personId) => {
+const editPerson = (trId, personId, adding = false) => {
   // alert(`edit tr=${trId}, personId=${personId}`);
   const tr = document.getElementById(trId);
   const updatedPersonValue = { id: personId };
@@ -263,8 +277,6 @@ const editPerson = (trId, personId) => {
   tr.childNodes.forEach(node => {
     console.log('editPerson:: node:', node);
 
-    // ignoring node ID 'td-id-pXXX'
-
     if (node.id.startsWith('td-name-p')) {
       updatedPersonValue.name = node.innerText;
       node.innerText = '';
@@ -274,6 +286,7 @@ const editPerson = (trId, personId) => {
           type: 'input',
           id: `editing-${node.id}`,
           mode: 'text',
+          autofocus: true,
           value: updatedPersonValue.name,
           onchange: event => {
             console.log(
@@ -413,7 +426,9 @@ const editPerson = (trId, personId) => {
 
               document.getElementById(
                 'label-status'
-              ).innerText = `Person with ID ${personId} updated`;
+              ).innerText = `Person with ID ${personId} ${
+                adding ? 'added' : 'updated'
+              }`;
             }
           },
           className: 'edit-button',
@@ -659,6 +674,7 @@ const createElement = prop => {
       if (prop.max !== null || prop.max !== undefined) element.max = prop.max;
       if (prop.value) element.value = prop.value;
       // if (prop.onkeypress) element.onkeypress = prop.onkeypress;
+      if (prop.autofocus) element.autofocus = prop.autofocus;
       if (prop.onchange) element.onchange = prop.onchange;
       if (prop.className) element.className = prop.className;
       break;
