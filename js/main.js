@@ -189,7 +189,9 @@ const updatePerson = data => {
 // };
 
 const revertEditingPerson = (tr, personId) => {
-  const person = personRecords.find(p => p.id === personId).person;
+  console.log('revertEditingPerson::', { tr, personId });
+
+  const person = personRecords.find(p => p.id === personId)?.person;
 
   let childHierarchy = '';
   tr.childNodes.forEach(node => {
@@ -205,6 +207,13 @@ const revertEditingPerson = (tr, personId) => {
     ', child node names:',
     childHierarchy
   );
+
+  /* in case of adding a new person, remove the whole row directly */
+  if (!person) {
+    tr.remove();
+    state.editingInfo = null;
+    return;
+  }
 
   tr.childNodes.forEach(node => {
     console.log('revertEditingPerson:: node:', node);
@@ -236,7 +245,7 @@ const revertEditingPerson = (tr, personId) => {
         }
       });
 
-      nodesToRemove.forEach(node => node.remove(node));
+      nodesToRemove.forEach(node => node.remove());
     }
 
     // if (!node.id.startsWith('td-id-'))
@@ -670,8 +679,8 @@ const createElement = prop => {
       element = document.createElement('input');
       if (prop.id) element.id = prop.id;
       element.type = prop.mode;
-      if (prop.min !== null || prop.min !== undefined) element.min = prop.min;
-      if (prop.max !== null || prop.max !== undefined) element.max = prop.max;
+      if (prop.min !== null && prop.min !== undefined) element.min = prop.min;
+      if (prop.max !== null && prop.max !== undefined) element.max = prop.max;
       if (prop.value) element.value = prop.value;
       // if (prop.onkeypress) element.onkeypress = prop.onkeypress;
       if (prop.autofocus) element.autofocus = prop.autofocus;
