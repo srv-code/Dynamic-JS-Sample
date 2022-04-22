@@ -272,9 +272,8 @@ const editPerson = (trId, personId, adding = false) => {
           width: 17,
           onclick: () => {
             const errorLen = Object.keys(state.editingInfo.errors).length;
-            let errorMessage;
             if (errorLen) {
-              errorMessage = `${errorLen} error(s) in form:`;
+              let errorMessage = `${errorLen} error(s) in form:`;
               for (const key in state.editingInfo.errors)
                 errorMessage += `\n${state.editingInfo.errors[key]}`;
 
@@ -387,6 +386,7 @@ const generateForm = () => {
     .filter(p => !p.loadOnInit)
     .forEach(prop => fragment.appendChild(createElement(prop)));
   document.getElementById('root').appendChild(fragment);
+
   document.getElementById('label-status').innerText = 'Form generated';
 };
 
